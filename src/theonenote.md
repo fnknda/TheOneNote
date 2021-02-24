@@ -114,7 +114,13 @@ ffmpeg -i /dev/video0 -f mpegts - | vlc -
 
 ## make
 
-Makes with dependencies. If no dependencies change, make won't do anything but if any of those change, make will only do the minimal amount of work to make the final target file.
+Don't echo command
+```make
+all:
+	@echo Something
+```
+
+Makes with dependencies. Runs only **if** the dependency change
 ```make
 target.pdf: target.md dep1.png
 	pandoc -o target.pdf target.md
@@ -123,7 +129,7 @@ dep1.png: dep1.plt
 	gnuplot dep1.plt
 ```
 
-Pattern matching. Swaps `$*` for whatever was matched by the wildcard `%` and `$@` by the target output.
+Pattern matching. Swaps `$*` for whatever was matched by the wildcard `%` and `$@` by the target
 ```make
 target.pdf: target.md plot-dep.png
 	pandoc -o target.pdf target.md
@@ -136,41 +142,40 @@ plot-%.png: %.plt
 
 ## Red Team
 
-### CTF Websites
+### Links
 
 #### Infos
 
-* CTFTime
-* CTF101
+* [CTFTime](https://ctftime.org/)
+* [CTF101](https://ctf101.org/)
 
 #### Challenges
 
-* Crackmes.one
-* CryptoHack
-* Cryptopals
-* Damn Vulnerable Hub
-* Exploit Education
-* HackTheBox
-* HackThisSite
-* Lord of SQL Injection
-* Metasploitable
-* Microcorruption
-* Nightmare
-* OverTheWire - Bandit
-* OverTheWire - Natas
-* PicoCTF
+* [Crackmes.one](https://crackmes.one/)
+* [CryptoHack](https://cryptohack.org/)
+* [Cryptopals](https://cryptopals.com/)
+* [VulnHub](https://www.vulnhub.com/)
+* [Exploit Education](https://exploit.education/)
+* [HackTheBox](https://www.hackthebox.eu/)
+* [HackThisSite](https://www.hackthissite.org/)
+* [Lord of SQL Injection](https://los.rubiya.kr/)
+* [Metasploitable](https://docs.rapid7.com/metasploit/metasploitable-2/)
+* [Microcorruption](https://microcorruption.com/login)
+* [OverTheWire - Bandit](https://overthewire.org/wargames/bandit)
+* [OverTheWire - Natas](https://overthewire.org/wargames/natas)
+* [PicoCTF](https://www.picoctf.org/)
 * Pwnable.{xyz,kr,tw}
-* RingZer0
-* RPOemporium
-* SANS Holiday Hack Challenges
-* SmashTheStack
-* TryHackMe
-* VulnHub
+* [RingZer0](https://ringzer0ctf.com/)
+* [ROP Emporium](https://ropemporium.com/)
+* [SANS Holiday Hack Challenges](https://holidayhackchallenge.com/)
+* [SmashTheStack](http://smashthestack.org/)
+* [TryHackMe](http://tryhackme.com/)
 
 ### General
 
 #### Hash Cracking
 
+* [crackstation](https://crackstation.net/)
 * john
 * hashcat
 * hashid
@@ -180,8 +185,8 @@ plot-%.png: %.plt
 
 #### Useful links
 
-* requestcatcher.com
-* requestbin.net
+* [requestcatcher.com](https://requestcatcher.com/)
+* [requestbin.net](https://requestbin.net/)
 
 #### Useful Tools
 
@@ -247,7 +252,7 @@ _: List/Goto symbols
 * steghide - jpeg
 * zsteg - png, bmp
 * stegcracker
-* stegoveritas - image filters
+* stegoveritas - auto image filtering
 
 #### Binwalk
 
