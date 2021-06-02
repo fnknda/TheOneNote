@@ -168,6 +168,39 @@ plot-%.png: %.plt
 	gnuplot $*.plt -o $@
 ```
 
+## Tmux
+
+### Simple named session
+
+```bash
+tmux -s session_name
+```
+
+### Shared session
+
+```bash
+tmux new -s alice
+```
+
+And
+
+```bash
+tmux a -t alice
+```
+
+### Independent window sharing
+
+```bash
+tmux new -s alice
+```
+
+And
+
+```bash
+tmux new -s bob -t alice
+```
+
+
 # InfoSec
 
 ## Links
@@ -395,6 +428,7 @@ tshark -r file -z follow,prot,mode,filter[,range]
 tshark -r file -z "follow,tcp,ascii,200.57.7.197:32891,200.57.7.198:2906"
 ```
 
+
 # Programming
 
 ## Versioning
@@ -443,6 +477,151 @@ Test something that was broken before to prevent its reintroduction
 #### Mocking
 
 Replace parts of code to simulate a simpler environment
+
+## Catch2
+
+C++ unit testing library
+
+Compile and run like this (with cmake):
+
+CMakeLists.txt
+```cmake
+# ...
+find_package(Catch2 REQUIRED)
+add_executable(test test/main.cpp)
+target_link_libraries(test Catch2Main Catch2)
+```
+
+test/main.cpp
+```cpp
+#include <catch2/catch_all.hpp>
+// ...
+```
+
+### REQUIRE & CHECK
+
+When REQUIRE fails, the tests abort
+```cpp
+REQUIRE( f() == 42 );
+```
+
+When CHECK fails, the tests continue
+```cpp
+CHECK( f() == 42 );
+```
+
+### REQUIRE_THAT & CHECK_THAT
+
+Adds a second argument, a matcher.
+
+Tests if the test matches the matcher
+```cpp
+REQUIRE_THAT( f(), Equals(42) )
+REQUIRE_THAT( get_string(), Contains("banana") )
+REQUIRE_THAT( get_string(), StartsWith("ba") )
+REQUIRE_THAT( get_string(), EndsWith("ana") )
+REQUIRE_THAT( get_vector(), VectorContains(9) )
+REQUIRE_THAT( get_vector(), ( VectorContains(2) || VectorStartsWith(4) ) && Contains(3) )
+```
+
+Define custom matchers for your classes:
+```cpp
+class CustomMatcher : public Catch::MatcherBase<ClassToMatch>
+{
+	private:
+		int m_expected;
+
+	public:
+		explicit CustomMatcher(int to_match) :
+			m_expected(to_match)
+		{}
+		bool match(const ClassToMatch& other) const override
+		{
+			return m_expected == other.value;
+		}
+
+		std::string describe() const override
+		{
+			return "Custom class is equals to other";
+		}
+};
+
+TEST_CASE()
+{
+	REQUIRE_THAT(ClassToMatch(), CustomMatcher(3));
+}
+```
+
+Sections inside test cases:
+```cpp
+TEST_CASE()
+{
+	SECTION()
+	{
+		REQUIRE();
+		// ...
+	}
+}
+```
+
+Generate test cases:
+```cpp
+TEST_CASE()
+{
+	int x = GENERATE(range(1, 11));
+	int y = GENERATE(range(101, 111));
+
+	REQUIRE(x < y);
+}
+
+TEST_CASE()
+{
+	auto s = GENERATE(as<std::string>(), "a", "b", "c"); // as keeps s from being a char*
+
+	REQUIRE_THAT(banana(), Contains(s));
+}
+
+TEST_CASE()
+{
+	auto [input, expected_output] = GENERATE( values<std::pair<int, std::string>>({
+		{3, "three"},
+		{6, "six"},
+		{1, "one"},
+		{9, "nine"}
+	}));
+
+	REQUIRE(to_string(input) == expected_output);
+}
+
+TEST_CASE()
+{
+	auto [input, expected_output] = GENERATE( table<int, std::string>({
+		{3, "three"},
+		{6, "six"},
+		{1, "one"},
+		{9, "nine"}
+	}));
+
+	REQUIRE(to_string(input) == expected_output);
+}
+
+TEST_CASE()
+{
+	auto [start, eat, left] = GENERATE( table<int, int, int>({
+		{3, 2, 1},
+		{12, 0, 12},
+		{6, 6, 0},
+		{1, -1, 2},
+		{9, 10, -1}
+	}));
+
+	GIVEN("There are " << start << " bananas")
+	WHEN("I eat " << eat << " bananas")
+	THEN("I should have " << left << " bananas") {
+		REQUIRE(eat_bananas(start, end) == left);
+	}
+}
+```
 
 ## git
 
@@ -512,6 +691,10 @@ Expand to an empty string when not set
 set(hello world)
 message(STATUS "Hello, ${hello}")
 ```
+
+#### Useful variables
+
+* `CMAKE_CURRENT_SOURCE_DIR`
 
 ### Comments
 
@@ -587,35 +770,57 @@ target_compile_features(Foo
 )
 ```
 
-## Tmux
+## Debugging
 
-#### Simple named session
+### GDB
 
-```bash
-tmux -s session_name
+#### Running
+```
+file - load file symbols
+r - start new debug session
+stepi - start and stop at the first instruction of the program
+s - step (also step inside function calls)
+n - step (skip function calls)
+c - continue running until end of program or breakpoint
 ```
 
-#### Shared session
-
-```bash
-tmux new -s alice
+#### Breakpoints
+```
+b <lineNum>|*<instructionAddr>[+<offsetNum>] [if <condition>] - set breakpoint
+i b - list breakpoints
+d [breakpointID] - delete breakpoint (if no breakpoint, delete all breakpoints)
 ```
 
-And
-
-```bash
-tmux a -t alice
+#### Var
+```
+p (<expression>|*<arr>@<len>) - prints the expression or array <arr> of length <len>
+whatis <var> - check type of <var>
+i local - list local variables
+i args - list current function args
+watch <expression> [if <condition>] - watch expression and everytime the expression changes, the execution stops
+rwatch <expression> [if <condition>] - everytime the expression is read, the execution stops
+set args <arg>... - set args of current frame to <arg>...
+set var <var> <value> - set <var> to <value>
 ```
 
-#### Independent window sharing
-
-```bash
-tmux new -s alice
+#### Recording
+```
+record - records the execution and allows for reverse commands
+reverse-continue - same as normal, but in reverse
+reverse-stepi - same as normal, but in reverse
+reverse-step - same as normal, but in reverse
+reverse-nexti - same as normal, but in reverse
+reverse-next - same as normal, but in reverse
 ```
 
-And
-
-```bash
-tmux new -s bob -t alice
+#### Misc
 ```
-
+disas [<symbol>] - disassembles <symbol> (or current frame)
+x/[<N>](x|s|i) *<address> - show N objects (x: hex, s: strings, i: instructions) stored on address <address>
+refresh/ctrl-l - redraws the screen
+ctrl-x-a - toggle from/to tui mode
+ctrl-x-2 - visual window modes
+set print pretty on - help print structures
+set disassembly- intel - set better asm style
+command <breakpointID> [<command>] - register command <command> (or commands passed as stdin) to run when breakpoint is hit
+```
