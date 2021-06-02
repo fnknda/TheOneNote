@@ -293,31 +293,46 @@ Enter with analysis on
 r2 -AA <file>
 ```
 
-Visual mode
+### Visual mode
+
+#### Enter Panel Mode
 ```
-# Enter Panel Mode
 > v<CR>
-
-# On Panel Mode
-<space>: Enter Graph Mode
-<enter>: Zoom current panel
-_: List/Goto symbols
-\: Possible commands (One useful option is in 'edit > asm.pseudo')
-!: Simple assembly visualization
-b: Browse stuff
-w: Window Mode
-
-# On Window Mode
-X: Close window
-
-# On Graph Mode
-q: Exit Graph Mode
-<space>: Exit Graph Mode
-_: List/Goto symbols
--: Zoom Out
-+: Zoom In
-0: Default Zoom
 ```
+
+#### On Panel Mode
+* `<space>`
+: Enter Graph Mode
+* `<enter>`
+: Zoom current panel
+* `_`
+: List/Goto symbols
+* `\`
+: Possible commands (One useful option is in 'edit > asm.pseudo')
+* `!`
+: Simple assembly visualization
+* `b`
+: Browse stuff
+* `w`
+: Window Mode
+
+#### On Window Mode
+* `X`
+: Close window
+
+#### On Graph Mode
+* `q`
+: Exit Graph Mode
+* `<space>`
+: Exit Graph Mode
+* `_`
+: List/Goto symbols
+* `-`
+: Zoom Out
+* `+`
+: Zoom In
+* `0`
+: Default Zoom
 
 ## Forensics
 
@@ -775,52 +790,73 @@ target_compile_features(Foo
 ### GDB
 
 #### Running
-```
-file - load file symbols
-r - start new debug session
-stepi - start and stop at the first instruction of the program
-s - step (also step inside function calls)
-n - step (skip function calls)
-c - continue running until end of program or breakpoint
-```
+* `file`
+: load file symbols
+* `r`
+: start new debug session
+* `stepi`
+: start and stop at the first instruction of the program
+* `s`
+: step (also step inside function calls)
+* `n`
+: step (skip function calls)
+* `c`
+: continue running until end of program or breakpoint
 
 #### Breakpoints
-```
-b <lineNum>|*<instructionAddr>[+<offsetNum>] [if <condition>] - set breakpoint
-i b - list breakpoints
-d [breakpointID] - delete breakpoint (if no breakpoint, delete all breakpoints)
-```
+* `b <lineNum>|*<instructionAddr>[+<offsetNum>] [if <condition>]`
+: set breakpoint
+* `i b`
+: list breakpoints
+* `d [breakpointID]`
+: delete breakpoint (if no breakpoint, delete all breakpoints)
 
 #### Var
-```
-p (<expression>|*<arr>@<len>) - prints the expression or array <arr> of length <len>
-whatis <var> - check type of <var>
-i local - list local variables
-i args - list current function args
-watch <expression> [if <condition>] - watch expression and everytime the expression changes, the execution stops
-rwatch <expression> [if <condition>] - everytime the expression is read, the execution stops
-set args <arg>... - set args of current frame to <arg>...
-set var <var> <value> - set <var> to <value>
-```
+* `p (<expression>|*<arr>@<len>)`
+: prints the expression or array `<arr>` of length `<len>`
+* `whatis <var>`
+: check type of `<var>`
+* `i local`
+: list local variables
+* `i args`
+: list current function args
+* `watch <expression> [if <condition>]`
+: watch expression and everytime the expression changes, the execution stops
+* `rwatch <expression> [if <condition>]`
+: everytime the expression is read, the execution stops
+* `set args <arg>...`
+: set args of current frame to `<arg>...`
+* `set var <var> <value>`
+: set `<var>` to `<value>`
 
 #### Recording
-```
-record - records the execution and allows for reverse commands
-reverse-continue - same as normal, but in reverse
-reverse-stepi - same as normal, but in reverse
-reverse-step - same as normal, but in reverse
-reverse-nexti - same as normal, but in reverse
-reverse-next - same as normal, but in reverse
-```
+* `record`
+: records the execution and allows for reverse commands
+* `reverse-continue`
+: same as normal, but in reverse
+* `reverse-stepi`
+: same as normal, but in reverse
+* `reverse-step`
+: same as normal, but in reverse
+* `reverse-nexti`
+: same as normal, but in reverse
+* `reverse-next`
+: same as normal, but in reverse
 
 #### Misc
-```
-disas [<symbol>] - disassembles <symbol> (or current frame)
-x/[<N>](x|s|i) *<address> - show N objects (x: hex, s: strings, i: instructions) stored on address <address>
-refresh/ctrl-l - redraws the screen
-ctrl-x-a - toggle from/to tui mode
-ctrl-x-2 - visual window modes
-set print pretty on - help print structures
-set disassembly- intel - set better asm style
-command <breakpointID> [<command>] - register command <command> (or commands passed as stdin) to run when breakpoint is hit
-```
+* `disas [<symbol>]`
+: disassembles <symbol> (or current frame)
+* `x/[<N>](x|s|i) *<address>`
+: show `<N>` objects (x: hex, s: strings, i: instructions) stored on address `<address>`
+* `refresh/ctrl-l`
+: redraws the screen
+* `ctrl-x-a`
+: toggle from/to tui mode
+* `ctrl-x-2`
+: visual window modes
+* `set print pretty on`
+: help print structures
+* `set disassembly- intel`
+: set better asm style
+* `command <breakpointID> [<command>]`
+: register command `<command>` (or commands passed as stdin) to run when breakpoint is hit
