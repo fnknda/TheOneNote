@@ -1,6 +1,6 @@
 ---
 title: The One Note
-subtitle: Tips and tricks on computer
+subtitle: Notes on computer
 author: João Fukuda
 ---
 
@@ -443,7 +443,6 @@ tshark -r file -z follow,prot,mode,filter[,range]
 tshark -r file -z "follow,tcp,ascii,200.57.7.197:32891,200.57.7.198:2906"
 ```
 
-
 # Programming
 
 ## Versioning
@@ -665,6 +664,46 @@ Check what **any** hash means
 git cat-file -p <hash>
 ```
 
+## Makefile
+
+Make defaults to the first rule
+```make
+default:
+#do stuff here
+```
+
+`.PHONY` identifies non-file rules
+```make
+.PHONY: all
+
+all: output
+
+output: code
+   compile code to output
+```
+
+`%` is used to match parts of the rule's names and dependencies
+```make
+%.pdf: %.tex
+   latexmk $<
+
+tmp/%.o: src/%.cpp
+   gcc $< -o $@
+```
+
+### Useful variables
+
+* `$<`
+: First dependency
+* `$^`
+: All dependencies
+* `$@`
+: Target name
+* `$*`
+: Result of pattern matching
+
+More [here](https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html#Automatic-Variables)
+
 ## CMake
 
 #### Directories
@@ -844,6 +883,10 @@ target_compile_features(Foo
 : same as normal, but in reverse
 
 #### Misc
+* `dprintf <symbol>,<format>,[<arg>...]`
+: put printf without having to recompile the code
+* `frame <N>`
+: put you on the `<N>` frame (or scope) (useful on backtracing)
 * `disas [<symbol>]`
 : disassembles <symbol> (or current frame)
 * `x/[<N>](x|s|i) *<address>`
@@ -860,3 +903,48 @@ target_compile_features(Foo
 : set better asm style
 * `command <breakpointID> [<command>]`
 : register command `<command>` (or commands passed as stdin) to run when breakpoint is hit
+
+### Valgrind
+
+Start valgrind
+```bash
+valgrind program
+```
+
+Start with gdb server stopping at the first instruction
+```bash
+valgrind --vgdb=full --vgdb-error=0 program
+```
+
+## GCC
+
+`gcc` and `g++` both have the same set of flags
+
+Normal compilation
+```bash
+gcc <src>
+```
+
+With gdb debugging flags
+```bash
+gcc -ggdb3 -Og <src>
+```
+
+Check for invalid memory access
+```bash
+gcc -fsanitize=address <src>
+```
+
+Optimization
+```bash
+gcc -O0 <src> # no optimization
+gcc -O1 <src> # Simplest optimization (fast)
+gcc -O2 <src> # Normal optimization (normal)
+gcc -O3 <src> # Best optimization (slow)
+gcc -Ofast <src> # Weird optimization
+```
+
+Treat warnings as errors:
+```bash
+gcc -Werror <src>
+```
