@@ -867,12 +867,16 @@ target_compile_features(Foo
 : continue running until end of program or breakpoint
 
 #### Breakpoints
-* `b <lineNum>|*<instructionAddr>[+<offsetNum>] [if <condition>]`
+* `break <lineNum>|*<instructionAddr>[+<offsetNum>] [thread <threadno>] [if <condition>]`
 : set breakpoint
-* `i b`
+* `info break`
 : list breakpoints
-* `d [breakpointID]`
+* `condition <breaknum> [<expression>]`
+: adds (or removes if expression is not passed) a condition to breakpoint `<breaknum>`
+* `delete [breakpointID]`
 : delete breakpoint (if no breakpoint, delete all breakpoints)
+* `commands <breakpointID> [<command>]`
+: register command `<command>` (or commands passed as stdin) to run when breakpoint is hit
 
 #### Var
 * `p (<expression>|*<arr>@<len>)`
@@ -925,8 +929,6 @@ target_compile_features(Foo
 : help print structures
 * `set disassembly- intel`
 : set better asm style
-* `command <breakpointID> [<command>]`
-: register command `<command>` (or commands passed as stdin) to run when breakpoint is hit
 
 ### Valgrind
 
