@@ -21,7 +21,6 @@ Programs list:
 * gnuplot
 * xargs
 * convert
-* gnuplot
 
 ## entr
 
@@ -443,6 +442,27 @@ tshark -r file -z follow,prot,mode,filter[,range]
 tshark -r file -z "follow,tcp,ascii,200.57.7.197:32891,200.57.7.198:2906"
 ```
 
+### nslookup (network service/server)
+
+Normal/reverse lookup
+```
+> server <DNS server>
+> 1.1.1.1
+> joaofukuda.dev
+```
+
+Change register type
+```bash
+nslookup --type=MX 1.1.1.1
+```
+
+### NMap
+
+Run nmap with proxychains (needs `sudo` and `-sT` (maybe `-n` for no DNS resolution))
+```bash
+sudo proxychains nmap -sT [-n] [<options> ...] <target>
+```
+
 # Programming
 
 ## Versioning
@@ -706,6 +726,10 @@ More [here](https://www.gnu.org/software/make/manual/html_node/Automatic-Variabl
 
 ## CMake
 
+#### Useful Environmental Variables
+
+`CC` defines C and `CXX` defines C++ compiler
+
 #### Directories
 
 Need to have a `CMakeLists.txt` file.
@@ -916,38 +940,47 @@ Start with gdb server stopping at the first instruction
 valgrind --vgdb=full --vgdb-error=0 program
 ```
 
-## GCC
+## Clang & GCC
 
-`gcc` and `g++` both have the same set of flags
+`clang`, `clang++`, `gcc` and `g++` both have the same set of flags
 
 Normal compilation
 ```bash
-gcc <src>
+${CC} <src>
 ```
 
 With gdb debugging flags
 ```bash
-gcc -ggdb3 -Og <src>
+${CC} -ggdb3 -Og <src>
 ```
 
 Check for invalid memory access
 ```bash
-gcc -fsanitize=address <src>
+${CC} -fsanitize=address <src>
 ```
 
 Optimization
 ```bash
-gcc -O0 <src> # no optimization
-gcc -O1 <src> # Simplest optimization (fast)
-gcc -O2 <src> # Normal optimization (normal)
-gcc -O3 <src> # Best optimization (slow)
-gcc -Ofast <src> # Weird optimization
+${CC} -O0 <src> # no optimization
+${CC} -O1 <src> # Simplest optimization (fast)
+${CC} -O2 <src> # Normal optimization (normal)
+${CC} -O3 <src> # Best optimization (slow)
+${CC} -Ofast <src> # Weird optimization
 ```
 
 Treat warnings as errors:
 ```bash
-gcc -Werror <src>
+${CC} -Werror <src>
 ```
+
+### Clang niceties
+
+Dump `struct`'s memory layout
+```bash
+clang -cc1 -emit-{obj,llvm} -fdump-record-layouts{,-simple}
+```
+
+`-cc1` is clang's front-end (the internal options)
 
 ## Modern C/C++ Networking (Linux)
 
@@ -1155,6 +1188,7 @@ for (int i = 0; i != 10; ++i) {
 ```
 
 Possible iteration division types:
+
 * `static`
 : specifically chunk-sized iterations, in order
 * `dynamic`
@@ -1185,3 +1219,173 @@ Also allows:
 
 * [For & Schedule](http://jakascorner.com/blog/2016/06/omp-for-scheduling.html)
 * [For & Reduce](http://jakascorner.com/blog/2016/06/omp-for-reduction.html)
+
+### Cuda
+
+* Thread
+: One processing flow
+* Block
+: X by Y threads
+* Grid
+: M by N blocks
+
+```cpp
+#include <cuda.h>
+
+// Kernel (gpu function)
+__global__ void greet()
+{
+	// Do stuff
+}
+
+int main()
+{
+	// N threads
+	greet<<<1, N>>>();
+}
+```
+
+Kernel functions are called with `<<<X, Y>>>`
+
+* `X`
+: Num of blocks
+* `Y`
+: Threads per block
+
+**Define block/grid dimension**
+
+Pass a `dim3` instead of an `int`
+
+```cpp
+dim3 blockDim(32, 32); // 1024 threads
+greet<<<1, blockDim>>>();
+```
+
+**Useful vars (inside kernel functions)**
+
+* `gridDim`
+* `blockIdx`
+* `blockDim`
+* `threadIdx`
+
+**Passing arrays back and forth to the GPU**
+
+Allocate memory on GPU
+
+```cpp
+int* array;
+cudaMalloc(&array, 128);
+```
+
+Send data to the GPU
+
+```cpp
+cudaMemcpy(array, buf, 128, cudaMemcpyHostToDevice);
+```
+
+Receive data from the GPU
+
+```cpp
+cudaMemcpy(buf, array, 128, cudaMemcpyDeviceToHost);
+```
+
+Free memory allocated
+
+```cpp
+cudaFree(array);
+```
+
+**Printing inside CUDA Kernel Function**
+
+```cpp
+printf("Thread id: %d\n", (threadIdx.y * blockDim.x) + threadIdx.x);
+```
+
+Yes, `printf`
+
+**Compiling and Running**
+
+Compile:
+
+```bash
+nvcc [gcc flags] main.c -o app
+```
+
+And run:
+
+```bash
+./app
+```
+
+## C/C++ Distributed Systems
+
+### OpenMPI
+
+* Rank
+: thread id
+* Size
+: max threads
+
+```c
+#include <mpi.h>
+
+int main(int argc, char* argv[])
+{
+	int rank, size;
+
+	MPI_Init(&argc, &argv);
+
+	// Get rank
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// Get comm size
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	// Stuff happens here
+
+	MPI_Finalize();
+}
+```
+
+**Compiling and Running**
+
+Compile:
+
+```bash
+mpicc [gcc flags] main.c -o app
+```
+
+And run:
+
+```bash
+mpirun -c <num_of_processes> ./app
+```
+
+**Messaging**
+
+Send and receive data through:
+
+```c
+void* buf; // Message to send
+int count; // Number of data
+MPI_Datatype type; // Type of data
+int dest; // Destination rank (id)
+int tag; // Message's tags
+MPI_Comm comm; // Comm (normally MPI_COMM_WORLD)
+
+MPI_Send(buf, count, type, dest, tag, comm);
+
+// And
+
+MPI_Status* status; // Status of recv
+
+MPI_Recv(buf, count, type, src, tag, comm, status);
+```
+
+And broadcast (and receive) to all processes in a communication with:
+
+```c
+int root; // Rank (id) of the sending process
+MPI_Request* req; // Request handle (don't ask, I don't know)
+
+MPI_Bcast(buf, count, type, root, comm, req);
+```

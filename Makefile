@@ -7,6 +7,7 @@ help:
 	@echo
 	@echo Examples:
 	@echo "   make pdf (compiles to PDF format)"
+	@echo "   make read (read the generated pdf)"
 	@echo "   make clean (removes any generated files)"
 	@echo "   make help (this message)"
 
@@ -26,3 +27,6 @@ clean:
 %.html: src/%.md
 	@echo Compiling HTML version of TheOneNote
 	@pandoc --highlight-style ${HIGHLIGHT_THEME} -o $@ $^
+
+read: theonenote.pdf
+	zathura $<
