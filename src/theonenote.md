@@ -730,11 +730,38 @@ More [here](https://www.gnu.org/software/make/manual/html_node/Automatic-Variabl
 
 `CC` defines C and `CXX` defines C++ compiler
 
+`CFLAGS` define compiler flags
+
+#### Useful Commands
+
+Autogen the `compile_commands.json` used by the LSP
+```cmake
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+```
+
 #### Directories
 
 Need to have a `CMakeLists.txt` file.
 
 They can be added with the CMake command `add_subdirectory()`.
+
+#### Check platform on C/C++
+
+```c
+if (WIN32)
+   #do something
+endif (WIN32)
+
+if (UNIX)
+   #do something
+endif (UNIX)
+
+if (MSVC)
+   #do something
+endif (MSVC)
+```
+
+More [here](https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Write-Platform-Checks#platform-variables)
 
 #### Scripts
 
@@ -1390,4 +1417,87 @@ int root; // Rank (id) of the sending process
 MPI_Request* req; // Request handle (don't ask, I don't know)
 
 MPI_Bcast(buf, count, type, root, comm, req);
+```
+
+## Kernel Module Development
+
+### Required stuff
+
+Functions (`init` and `exit`), two options:
+
+* Classic (old)
+
+```c
+int init_module(void)
+{
+	return 0;
+}
+
+void cleanup_module(void)
+{
+}
+```
+
+* Modern (use this)
+
+```c
+#include <linux/init.h>
+
+int __init start_mod(void)
+{
+	return 0;
+}
+
+void __exit stop_mod(void)
+{
+}
+
+module_init(start_mod);
+module_exit(stop_mod);
+```
+
+Also define the license like this:
+
+```c
+MODULE_LICENSE("MIT"); // or GPL, Apache...
+```
+
+Author, description and supported devices can also be defined:
+
+```c
+MODULE_AUTHOR("Fukuda");
+MODULE_DESCRIPTION("Bananas will be loaded");
+MODULE_SUPPORTED_DEVICES("AMD64");
+```
+
+### The Makefile
+
+```Makefile
+.PHONY: all clean
+
+obj-m += src/hello.o
+
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+```
+
+### `__init`, `__initdata` and `__exit`
+
+`__init` and `__initdata` are freed once the module is loaded into kernel
+
+`__exit` is loaded only if the kernel is a module (and not built-in)
+
+Usage example of a `__initdata` macro:
+
+```c
+static int hello3_data __initdata = 3;
+```
+
+### Useful functions
+
+```c
+printk(KERN_INFO "Banana!\n");
 ```
